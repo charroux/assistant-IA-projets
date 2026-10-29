@@ -10,11 +10,12 @@ from pathlib import Path
 from typing import Any
 
 from . import __version__
-from .ai import apply_proposal, assist, audit, rollback
+from .ai import apply_proposal, ask as ask_ai, audit, propose as propose_ai, rollback
 from .checks import run_checks
 from .config import dump_yaml, load_yaml
 from .gitops import commit_files, current_commit, dirty_paths, is_repository
 from .graph import impact
+from .guidance import start_text
 from .models import CoherenceError
 from .reports import audit_markdown, check_markdown, check_text, write_json
 
@@ -36,6 +37,9 @@ def _parser() -> argparse.ArgumentParser:
     init.add_argument("--campus", choices=["paris", "bordeaux"], required=True)
     init.add_argument("--title", default="Engineering Project")
 
+    start = sub.add_parser("start", help="Expliquer les prochaines étapes sans IA.")
+    start.add_argument("--root", default=".")
+
     check = sub.add_parser("check", help="Exécuter les contrôles déterministes.")
     check.add_argument("--root", default=".")
     check.add_argument("--json", action="store_true")
@@ -51,13 +55,21 @@ def _parser() -> argparse.ArgumentParser:
     report.add_argument("--root", default=".")
     report.add_argument("--output", default="evaluation/rapport-coherence.md")
 
-    assistant = sub.add_parser("assist", help="Interroger l'assistant facultatif.")
-    assistant.add_argument("question")
-    assistant.add_argument("--root", default=".")
-    assistant.add_argument("--model")
-    assistant.add_argument("--apply", action="store_true")
-    assistant.add_argument("--commit", action="store_true")
-    assistant.add_argument("--save-report", action="store_true")
+    ask = sub.add_parser("ask", help="Poser une question à l'IA en lecture seule.")
+    ask.add_argument("question")
+    ask.add_argument("--root", default=".")
+    ask.add_argument("--model")
+
+    proposal = sub.add_parser("propose", help="Créer une proposition IA sans l'appliquer.")
+    proposal.add_argument("question")
+    proposal.add_argument("--root", default=".")
+    proposal.add_argument("--model")
+    proposal.add_argument("--output")
+
+    apply_cmd = sub.add_parser("apply", help="Appliquer une proposition IA déjà examinée.")
+    apply_cmd.add_argument("proposal")
+    apply_cmd.add_argument("--root", default=".")
+    apply_cmd.add_argument("--commit", action="store_true")
 
     evaluator = sub.add_parser("audit", help="Lancer l'audit IA indépendant.")
     evaluator.add_argument("--root", default=".")
@@ -87,6 +99,9 @@ def _dispatch(args: argparse.Namespace) -> int:
         print(f"Projet créé dans {Path(args.destination).resolve()}")
         print("Prochaine étape : vérifier confidentialite.yml puis lancer `coherence check`.")
         return 0
+    if args.command == "start":
+        print(start_text(_root(args.root)))
+        return 0
     if args.command == "check":
         report = run_checks(_root(args.root))
         print(json.dumps(report.to_dict(), ensure_ascii=False, indent=2) if args.json else check_text(report))
@@ -102,8 +117,12 @@ def _dispatch(args: argparse.Namespace) -> int:
         output.write_text(check_markdown(run_checks(root)), encoding="utf-8")
         print(f"Rapport écrit : {output}")
         return 0
-    if args.command == "assist":
-        return _assist_command(args)
+    if args.command == "ask":
+        return _ask_command(args)
+    if args.command == "propose":
+        return _propose_command(args)
+    if args.command == "apply":
+        return _apply_command(args)
     if args.command == "audit":
         return _audit_command(args)
     raise CoherenceError(f"Commande inconnue : {args.command}")
@@ -131,28 +150,46 @@ def init_project(destination: Path, *, campus: str, title: str) -> None:
     dump_yaml(project_path, project)
 
 
-def _assist_command(args: argparse.Namespace) -> int:
+def _ask_command(args: argparse.Namespace) -> int:
     root = _root(args.root)
-    if args.commit and not args.apply:
-        raise CoherenceError("`--commit` exige `--apply`.")
+    result = ask_ai(root, args.question, model=args.model)
+    print(_ask_text(result))
+    print("\nLecture seule : aucun fichier n'a été modifié.")
+    print("Pensez à déclarer cet usage dans usage_ia.yml.")
+    return 0
+
+
+def _propose_command(args: argparse.Namespace) -> int:
+    root = _root(args.root)
+    proposal = propose_ai(root, args.question, model=args.model)
+    print(_assistant_text(proposal))
+    relative = args.output or f"ecarts/propositions/proposition-{_stamp()}.json"
+    output = _output_path(root, relative)
+    write_json(output, proposal)
+    print(f"\nProposition enregistrée : {output}")
+    print(f"Après examen : coherence apply \"{relative}\"")
+    print("Aucun fichier du projet n'a encore été modifié.")
+    print("Pensez à déclarer cet usage dans usage_ia.yml.")
+    return 0
+
+
+def _apply_command(args: argparse.Namespace) -> int:
+    root = _root(args.root)
+    proposal_path = _output_path(root, args.proposal)
+    if not proposal_path.exists():
+        raise CoherenceError(f"Proposition introuvable : {proposal_path}")
+    try:
+        proposal = json.loads(proposal_path.read_text(encoding="utf-8"))
+    except (OSError, UnicodeError, json.JSONDecodeError) as exc:
+        raise CoherenceError(f"Proposition JSON illisible : {exc}") from exc
+    if not isinstance(proposal, dict) or not isinstance(proposal.get("changements"), list):
+        raise CoherenceError("Le fichier ne contient pas une proposition valide.")
     before = dirty_paths(root) if args.commit else []
     if before:
         raise CoherenceError(
             "Le dépôt contient déjà des modifications ; commit automatique refusé : "
             + ", ".join(before)
         )
-    proposal = assist(root, args.question, model=args.model)
-    print(_assistant_text(proposal))
-    if args.save_report:
-        stamp = _stamp()
-        output = root / "ecarts" / "rapports" / f"assistant-{stamp}.json"
-        write_json(output, proposal)
-        print(f"Rapport IA écrit : {output}")
-
-    if not args.apply:
-        print("\nAucun fichier modifié. Utiliser `--apply` pour appliquer la proposition.")
-        print("Pensez à déclarer cet usage dans usage_ia.yml.")
-        return 0
 
     changes = apply_proposal(root, proposal)
     if not changes.paths:
@@ -166,7 +203,7 @@ def _assist_command(args: argparse.Namespace) -> int:
             + check_text(verification)
         )
     print(f"{len(changes.paths)} fichier(s) modifié(s).")
-    print("Pensez à vérifier le diff et à déclarer cet usage dans usage_ia.yml.")
+    print("Vérifiez maintenant le diff avant toute validation humaine.")
     if args.commit:
         commit = commit_files(
             root,
@@ -249,6 +286,21 @@ def _assistant_text(data: dict[str, Any]) -> str:
     lines.extend(f"- {item}" for item in data.get("decisions_humaines_requises", []))
     if data.get("synthese_monday"):
         lines.extend(["", "Synthèse proposée pour Monday :", data["synthese_monday"]])
+    return "\n".join(lines)
+
+
+def _ask_text(data: dict[str, Any]) -> str:
+    lines = [data.get("reponse", "")]
+    sources = data.get("sources", [])
+    if sources:
+        lines.extend(["", "Sources consultées :"])
+        lines.extend(f"- {item}" for item in sources)
+    questions = data.get("questions", [])
+    if questions:
+        lines.extend(["", "Questions à clarifier :"])
+        lines.extend(f"- {item}" for item in questions)
+    if data.get("avis_expert_requis"):
+        lines.extend(["", "Un avis expert est nécessaire pour une partie de la réponse."])
     return "\n".join(lines)
 
 

@@ -8,6 +8,7 @@ from importlib import resources
 from pathlib import Path
 from typing import Any
 
+from .config import privacy_config
 from .models import CoherenceError
 from .security import ai_settings, collect_context, detect_secret, safe_change_path
 
@@ -80,6 +81,19 @@ ASSISTANT_SCHEMA: dict[str, Any] = {
         "decisions_humaines_requises",
         "synthese_monday",
     ],
+}
+
+
+ASK_SCHEMA: dict[str, Any] = {
+    "type": "object",
+    "additionalProperties": False,
+    "properties": {
+        "reponse": {"type": "string"},
+        "sources": {"type": "array", "items": {"type": "string"}},
+        "questions": {"type": "array", "items": {"type": "string"}},
+        "avis_expert_requis": {"type": "boolean"},
+    },
+    "required": ["reponse", "sources", "questions", "avis_expert_requis"],
 }
 
 
@@ -194,7 +208,24 @@ def _request(
     return payload
 
 
-def assist(root: Path, question: str, *, model: str | None = None) -> dict[str, Any]:
+def ask(root: Path, question: str, *, model: str | None = None) -> dict[str, Any]:
+    context = collect_context(root, "assistance")
+    user_input = (
+        "QUESTION DE L'ÉQUIPE\n"
+        f"{question}\n\n"
+        "CONTENU AUTORISÉ DU DÉPÔT\n"
+        f"{context}"
+    )
+    return _request(
+        model=_model(root, "assistance", model),
+        instructions=_prompt("reader.md"),
+        user_input=user_input,
+        schema=ASK_SCHEMA,
+        schema_name="lecture_projet",
+    )
+
+
+def propose(root: Path, question: str, *, model: str | None = None) -> dict[str, Any]:
     context = collect_context(root, "assistance")
     user_input = (
         "DEMANDE DE L'ÉQUIPE\n"
@@ -209,6 +240,9 @@ def assist(root: Path, question: str, *, model: str | None = None) -> dict[str, 
         schema=ASSISTANT_SCHEMA,
         schema_name="assistant_coherence",
     )
+
+
+assist = propose
 
 
 def audit(
@@ -233,7 +267,10 @@ def audit(
 
 
 def apply_proposal(root: Path, proposal: dict[str, Any]) -> AppliedChanges:
-    settings = ai_settings(root, "assistance")
+    privacy = privacy_config(root)
+    settings = privacy.get("ia", {})
+    if not isinstance(settings, dict) or not settings.get("modifications_autorisees"):
+        raise CoherenceError("Aucune liste de modifications autorisées n'est déclarée.")
     originals: dict[Path, str | None] = {}
     paths: list[Path] = []
     seen: set[Path] = set()

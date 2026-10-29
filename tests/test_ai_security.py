@@ -6,6 +6,7 @@ from pathlib import Path
 import pytest
 import yaml
 
+import assistant_ia_projets.ai as ai_module
 from assistant_ia_projets.ai import _request, apply_proposal
 from assistant_ia_projets.cli import init_project
 from assistant_ia_projets.models import CoherenceError
@@ -103,4 +104,27 @@ def test_openai_request_is_structured_and_not_stored(monkeypatch: pytest.MonkeyP
     assert captured["store"] is False
     assert captured["text"]["format"]["type"] == "json_schema"
     assert captured["text"]["format"]["strict"] is True
+
+
+def test_read_only_question_uses_dedicated_schema(
+    tmp_path: Path, monkeypatch: pytest.MonkeyPatch
+) -> None:
+    root = authorized_project(tmp_path)
+    captured = {}
+
+    def fake_request(**kwargs):
+        captured.update(kwargs)
+        return {
+            "reponse": "Commencer par le besoin.",
+            "sources": ["cadrage/besoin.md"],
+            "questions": [],
+            "avis_expert_requis": False,
+        }
+
+    monkeypatch.setattr(ai_module, "_request", fake_request)
+    result = ai_module.ask(root, "Par où commencer ?", model="modele-test")
+
+    assert result["reponse"] == "Commencer par le besoin."
+    assert captured["schema_name"] == "lecture_projet"
+    assert "strictement non modifiant" in captured["instructions"]
 

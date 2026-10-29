@@ -29,11 +29,28 @@ observation → écart → examen humain → décision → mise à jour → nouv
 Une couche aval peut révéler un problème, mais ne modifie jamais silencieusement
 le statut d'une couche amont.
 
+## Parcours d'utilisation
+
+```text
+start (sans IA)
+  ↓
+ask (IA en lecture seule)
+  ↓ optionnel
+propose (IA, écrit une proposition locale)
+  ↓ examen humain
+apply (sans IA, applique et vérifie)
+```
+
+Une IA disposant déjà d'un accès autorisé au dépôt peut également utiliser
+`PROMPT_DEMARRAGE.md`. La CLI ajoute une liste blanche de fichiers, la détection
+de secrets et des sorties structurées ; elle n'est pas l'unique interface possible.
+
 ## Modules
 
 - `repository.py` lit les artefacts Markdown et YAML.
 - `checks.py` exécute les règles déterministes.
 - `graph.py` calcule les impacts amont et aval.
+- `guidance.py` oriente l'étudiant sans appel IA.
 - `security.py` applique les autorisations et filtre le contexte IA.
 - `ai.py` appelle l'API Responses avec une sortie JSON structurée.
 - `reports.py` produit les rapports lisibles.

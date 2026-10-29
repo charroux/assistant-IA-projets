@@ -4,7 +4,7 @@ build-backend = "setuptools.build_meta"
 
 [project]
 name = "assistant-ia-projets"
-version = "0.1.0"
+version = "0.2.0"
 description = "Assistant facultatif de cohérence documentaire pour les Engineering Projects."
 readme = "README.md"
 requires-python = ">=3.11"
@@ -29,6 +29,7 @@ assistant_ia_projets = [
   "prompts/*.md",
   "templates/projet/*",
   "templates/projet/**/*",
+  "templates/projet/.gitignore",
 ]
 
 [tool.pytest.ini_options]

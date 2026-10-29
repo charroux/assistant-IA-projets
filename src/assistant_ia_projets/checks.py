@@ -10,9 +10,11 @@ from .repository import ID_PATTERN, artifact_map, iter_id_references, load_artif
 
 
 REQUIRED_FILES = (
+    ".gitignore",
     "projet.yml",
     "confidentialite.yml",
     "usage_ia.yml",
+    "PROMPT_DEMARRAGE.md",
     "cadrage/besoin.md",
     "cadrage/exigences.yml",
     "cadrage/risques.yml",

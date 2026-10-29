@@ -4,6 +4,9 @@ titre: Engineering Project
 campus: paris
 annee: 2026-2027
 phase: cadrage
+outil:
+  nom: assistant-ia-projets
+  version: 0.2.0
 suivi_institutionnel:
   outil: Monday
   identifiant: a_renseigner

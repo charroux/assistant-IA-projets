@@ -1,0 +1,26 @@
+# Environnement local et secrets
+.venv/
+.env
+.env.*
+!.env.example
+
+# Python
+__pycache__/
+*.py[cod]
+.pytest_cache/
+
+# Quarto
+.quarto/
+_site/
+
+# Rapports IA locaux : partage possible seulement après revue explicite
+ecarts/propositions/*.json
+evaluation/rapports/*.json
+evaluation/rapports/*.md
+
+# Fichiers système et éditeurs
+.DS_Store
+Thumbs.db
+.vscode/
+.idea/
+

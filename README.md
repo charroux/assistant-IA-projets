@@ -1,120 +1,233 @@
 # Assistant IA aux projets
 
-MVP d'un assistant facultatif de cohérence documentaire pour les Engineering
-Projects. Il aide une équipe à relier le besoin, le cadrage, les décisions, la
-conception, les preuves et les productions sans se substituer au mentor, à
-l'expert, au déposant ni au jury.
+Outil facultatif de cohérence documentaire pour les Engineering Projects. Il
+relie le besoin, le cadrage, les décisions, la conception, les preuves et les
+productions sans se substituer au mentor, à l'expert, au déposant ni au jury.
 
-## Principes
+## Deux dépôts distincts
 
-- Le cadre documentaire et les contrôles déterministes fonctionnent sans IA.
-- Monday reste la référence du suivi opérationnel, des actions et des échéances.
-- Git porte les artefacts du projet, leur histoire et leurs relations.
-- L'IA ne certifie ni la vérité métier, ni la validité scientifique ou technique.
-- Toute modification proposée par l'IA doit être explicitement appliquée par un
-  étudiant ; aucun changement de statut vers `valide` n'est autorisé.
-- L'audit IA final est consultatif, indépendant et strictement en lecture seule.
-- Aucun contenu n'est envoyé à un service d'IA sans autorisation déclarée dans
-  `confidentialite.yml`.
+Le dépôt de l'outil et le dépôt étudiant sont séparés :
 
-## Installation
+```text
+espace-de-travail/
+├── assistant-IA-projets/   outil cloné une fois
+│   └── .venv/              environnement Python local, jamais partagé
+└── projet-fictif/          dépôt partagé du projet étudiant
+```
+
+L'outil s'installe depuis `assistant-IA-projets`. Les commandes `coherence`
+s'exécutent ensuite depuis `projet-fictif`, ou avec `--root` suivi de son chemin.
+
+## Ce que font les commandes d'installation
+
+| Commande | Fonction | Appel IA |
+| --- | --- | --- |
+| `python -m venv .venv` | Crée un Python isolé pour l'outil | Non |
+| activation de `.venv` | Fait utiliser ce Python par le terminal courant | Non |
+| `python -m pip install .` | Installe la commande `coherence` | Non |
+| `coherence init` | Copie le modèle de projet | Non |
+
+Ces commandes doivent être exécutées séparément. L'environnement `.venv` est
+jetable, propre à chaque ordinateur et ne doit jamais être ajouté à Git.
+
+## Installation pour un étudiant
 
 Python 3.11 ou plus récent est requis.
 
+### Windows PowerShell
+
 ```powershell
 python -m venv .venv
-.venv\Scripts\Activate.ps1
-python -m pip install -e ".[dev]"
+.\.venv\Scripts\Activate.ps1
+python -m pip install .
 ```
 
-L'assistant OpenAI est optionnel. Pour l'utiliser, définir la clé dans
-l'environnement, jamais dans le dépôt :
+Si PowerShell interdit l'activation pour la session courante :
+
+```powershell
+Set-ExecutionPolicy -Scope Process -ExecutionPolicy Bypass
+.\.venv\Scripts\Activate.ps1
+```
+
+### Windows — Invite de commandes `cmd.exe`
+
+```bat
+py -m venv .venv
+.venv\Scripts\activate.bat
+python -m pip install .
+```
+
+### Git Bash sous Windows
+
+```bash
+python -m venv .venv
+source .venv/Scripts/activate
+python -m pip install .
+```
+
+### Linux ou macOS — Bash/Zsh
+
+```bash
+python3 -m venv .venv
+source .venv/bin/activate
+python -m pip install .
+```
+
+Sous certaines distributions Linux, le paquet système `python3-venv` doit être
+installé. L'activation est facultative : on peut appeler directement
+`.venv/bin/coherence` sous Linux ou `.venv\Scripts\coherence.exe` sous Windows.
+
+## Créer un projet étudiant séparé
+
+Depuis le dépôt de l'outil, après installation :
+
+```powershell
+coherence init ..\projet-fictif --campus paris --title "Projet fictif"
+cd ..\projet-fictif
+coherence start
+coherence check
+```
+
+Sous Linux, remplacer `..\projet-fictif` par `../projet-fictif`.
+
+`coherence start` explique quoi faire ensuite sans appeler d'IA. Le dépôt généré
+est autonome sur le plan documentaire : une IA autorisée à le lire peut aussi
+utiliser directement `PROMPT_DEMARRAGE.md`.
+
+## Quand une IA est-elle appelée ?
+
+| Commande | Fonction | Appel IA | Écriture |
+| --- | --- | --- | --- |
+| `coherence start` | Oriente l'étudiant selon la phase | Non | Non |
+| `coherence check` | Vérifie la structure et les relations | Non | Non |
+| `coherence impact EXG-001` | Explore les références | Non | Non |
+| `coherence report` | Produit un rapport déterministe | Non | Oui, rapport local |
+| `coherence ask "..."` | Répond à partir du dépôt | Oui | Non |
+| `coherence propose "..."` | Prépare un fichier de changements | Oui | Proposition locale seulement |
+| `coherence apply fichier.json` | Applique une proposition examinée | Non | Oui, transactionnelle |
+| `coherence audit` | Produit un audit documentaire indépendant | Oui | Non, sauf `--save` |
+
+Avant `ask`, `propose` ou `audit` :
+
+1. vérifier les autorisations dans `confidentialite.yml` ;
+2. ne conserver que les chemins autorisés ;
+3. définir la clé API dans l'environnement, jamais dans Git.
+
+PowerShell :
 
 ```powershell
 $env:OPENAI_API_KEY = "..."
 ```
 
+Invite de commandes Windows :
+
+```bat
+set OPENAI_API_KEY=...
+```
+
+Linux ou macOS :
+
+```bash
+export OPENAI_API_KEY="..."
+```
+
 Le modèle est configurable par `OPENAI_MODEL`, `--model` ou
-`confidentialite.yml`. Le réglage du projet est utilisé en dernier recours.
+`confidentialite.yml`.
 
-## Démarrage rapide
+## Trois niveaux d'utilisation
 
-Créer un projet étudiant :
+### 1. Commencer sans IA
 
-```powershell
-coherence init mon-projet --campus paris --title "Mon Engineering Project"
-cd mon-projet
+```text
+coherence start
 coherence check
 ```
 
-Analyser l'impact d'un artefact :
+### 2. Poser une question en lecture seule
 
-```powershell
-coherence impact EXG-001
+```text
+coherence ask "Je suis un étudiant qui commence. Par où commencer ?"
 ```
 
-Produire un rapport déterministe :
+L'IA ne reçoit que les fichiers autorisés, les secrets potentiels bloquent l'envoi
+et aucun fichier n'est modifié.
 
-```powershell
-coherence report --output evaluation/rapport-coherence.md
+### 3. Proposer puis appliquer une modification
+
+```text
+coherence propose "Structure le besoin initial"
+coherence apply "ecarts/propositions/proposition-....json"
 ```
 
-Après autorisation explicite de l'IA dans `confidentialite.yml` :
+`propose` enregistre une proposition qui doit être lue. `apply` n'appelle pas
+l'IA, contrôle les chemins, refuse une promotion automatique vers `valide`,
+exécute les vérifications et annule l'opération si elles échouent.
 
-```powershell
-coherence assist "Vérifie la cohérence du périmètre et des exigences"
-coherence assist "Propose la mise à jour des critères" --apply
-coherence assist "Consigne cette décision" --apply --commit
+Le commit reste optionnel :
+
+```text
+coherence apply "ecarts/propositions/proposition-....json" --commit
 ```
 
-`--apply` est obligatoire pour écrire. `--commit` ajoute uniquement les fichiers
-modifiés par la proposition et refuse de fonctionner si le dépôt était déjà sale.
+## Utiliser directement une IA ayant accès au dépôt
 
-Lancer l'audit documentaire indépendant :
+La CLI n'est pas obligatoire pour une conversation en lecture seule. Le projet
+généré contient `PROMPT_DEMARRAGE.md`, que l'étudiant peut donner à une IA déjà
+autorisée à lire son dossier.
+
+Le prompt interne `src/assistant_ia_projets/prompts/assistant.md` n'est pas un
+prompt à saisir par l'étudiant. Il encadre `coherence propose` : limites de rôle,
+résistance aux instructions présentes dans les documents, interdiction de
+valider, de supprimer ou de sortir du projet, et format structuré des changements.
+
+## Partage Git du projet étudiant
+
+### Partageable, sous réserve des autorisations
+
+- `projet.yml` et les guides ;
+- cadrage, exigences, risques et critères ;
+- décisions et conception ;
+- index de preuves expurgé ;
+- écarts relus ;
+- rapport et soutenance Quarto ;
+- `usage_ia.yml`, sans contenu confidentiel ;
+- code et démonstrateur lorsque leur partage est autorisé.
+
+### À ne jamais partager par défaut
+
+- `.venv/`, caches et résultats de construction ;
+- `.env`, clés API et secrets ;
+- données personnelles ou données d'entreprise non autorisées ;
+- preuves brutes confidentielles ;
+- propositions et rapports IA non relus.
+
+Le modèle génère un `.gitignore` adapté. Il réduit les erreurs courantes mais ne
+remplace pas la politique du projet. Monday reste la référence pour les actions,
+responsables, échéances, comptes rendus et alertes. Un accès du mentor au dépôt
+est un choix institutionnel et ne doit pas servir à mesurer les contributions par
+le nombre de commits.
+
+## Principes de responsabilité
+
+- Le cadre documentaire et les contrôles déterministes fonctionnent sans IA.
+- Les étudiants vérifient les productions générées et déclarent leurs usages.
+- Une IA ne certifie ni vérité métier, ni validité scientifique ou technique.
+- Une validation de statut reste humaine.
+- L'audit IA est consultatif, indépendant et en lecture seule.
+
+## Développement de l'outil
+
+Cette section concerne les contributeurs de `assistant-IA-projets`, pas les
+étudiants qui l'utilisent.
 
 ```powershell
-coherence audit --save
-```
-
-L'autorisation d'évaluation est distincte de l'autorisation d'assistance.
-
-## Commandes
-
-| Commande | Fonction |
-| --- | --- |
-| `coherence init` | Copie le modèle de projet et configure le campus |
-| `coherence check` | Vérifie schémas, identifiants, références et couverture |
-| `coherence impact` | Parcourt les dépendances amont et aval d'un identifiant |
-| `coherence report` | Génère un rapport de cohérence sans IA |
-| `coherence assist` | Analyse ou propose des modifications avec l'IA facultative |
-| `coherence audit` | Produit un audit IA indépendant, en lecture seule |
-
-## Répartition des responsabilités
-
-| Couche | Référence |
-| --- | --- |
-| Actions, responsables, échéances, comptes rendus | Monday |
-| Besoin, exigences, décisions, conception, preuves | Git |
-| Validité métier | Déposant et experts |
-| Validité technique ou scientifique | Experts |
-| Contrôle continu | Mentor |
-| Évaluation finale | Expert et jury humains |
-| Cohérence documentaire et analyse d'impact | Outil et assistant facultatif |
-
-Le dépôt ne doit pas servir à mesurer une contribution individuelle par le nombre
-de commits. L'usage de l'IA est déclaré, mais sa fréquence n'est pas un critère de
-qualité.
-
-## Développement
-
-```powershell
+python -m pip install -e ".[dev]"
 python -m compileall src
 pytest
 ```
 
-Le test de l'API OpenAI est volontairement simulé : les tests n'envoient aucune
-donnée et ne consomment aucun crédit.
+Les tests d'intégration OpenAI sont simulés : ils n'envoient aucune donnée et ne
+consomment aucun crédit.
 
 Voir [l'architecture](docs/architecture.md) et la
 [politique de contribution](CONTRIBUTING.md).
-

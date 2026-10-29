@@ -1,0 +1,11 @@
+version: 1
+risques:
+  - id: RSQ-001
+    titre: Risque à préciser
+    statut: brouillon
+    sources: [BES-001]
+    probabilite: a_estimer
+    impact: a_estimer
+    traitement: À compléter.
+    verification: À compléter.
+

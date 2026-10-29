@@ -1,0 +1,11 @@
+version: 1
+id: PRJ-001
+titre: Engineering Project
+campus: paris
+annee: 2026-2027
+phase: cadrage
+suivi_institutionnel:
+  outil: Monday
+  identifiant: a_renseigner
+  derniere_revue_prise_en_compte: null
+

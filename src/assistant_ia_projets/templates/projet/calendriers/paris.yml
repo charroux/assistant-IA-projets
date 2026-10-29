@@ -1,0 +1,42 @@
+campus: paris
+annee: 2026-2027
+jalons:
+  - date: 2026-11-05
+    nom: Kick-off
+  - date: 2026-11-06
+    nom: Début du cahier des charges
+  - date: 2026-11-13
+    nom: Journée projet
+  - date: 2026-11-19
+    nom: Journée projet
+  - date: 2026-11-20
+    nom: Journée projet
+  - date: 2026-11-27
+    nom: Journée projet
+  - date: 2026-12-04
+    nom: Validation du cahier des charges et début de la réalisation
+  - date: 2026-12-11
+    nom: Journée projet
+  - date: 2027-01-07
+    nom: Journée projet
+  - date: 2027-01-08
+    nom: Journée projet
+  - date: 2027-01-14
+    nom: Journée projet
+  - date: 2027-01-15
+    nom: Journée projet
+  - date: 2027-01-21
+    nom: Journée projet
+  - date: 2027-01-22
+    nom: Journée projet
+  - date: 2027-01-28
+    nom: Journée projet
+  - date: 2027-01-29
+    nom: Journée projet
+  - date: 2027-02-02
+    nom: Soutenances blanches
+  - date: 2027-02-03
+    nom: Soutenances
+  - date: 2027-03-04
+    nom: Engineering Projects Awards
+

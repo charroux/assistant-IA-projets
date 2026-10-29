@@ -1,0 +1,34 @@
+version: 1
+niveau: interne
+convention_projet: false
+git:
+  autorise: true
+  hebergement: institutionnel
+  contenu_exclu:
+    - donnees_personnelles
+    - secrets
+    - donnees_client_non_autorisees
+ia:
+  assistance_autorisee: false
+  evaluation_autorisee: false
+  cadre_adapte: false
+  fournisseur: null
+  modele: gpt-6-astra
+  contenu_autorise:
+    - projet.yml
+    - 00_guide_ia.md
+    - cadrage/**
+    - conception/**
+    - decisions/**
+    - preuves/**
+    - ecarts/index.yml
+    - productions/**
+    - evaluation/grille.yml
+  modifications_autorisees:
+    - cadrage/**
+    - conception/**
+    - decisions/**
+    - preuves/**
+    - ecarts/**
+    - productions/**
+

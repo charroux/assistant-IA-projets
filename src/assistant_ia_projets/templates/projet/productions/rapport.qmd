@@ -1,0 +1,33 @@
+---
+title: Rapport de projet
+id: PROD-001
+type: production
+statut: brouillon
+sources:
+  - BES-001
+  - EXG-001
+  - DEC-001
+  - PRV-001
+format: html
+---
+
+# Problème et bénéficiaires
+
+Reformuler fidèlement le besoin documenté.
+
+# Analyse et exigences
+
+Présenter les exigences, hypothèses, risques et critères d'acceptation.
+
+# Conception et décisions
+
+Relier les choix aux exigences et conserver les alternatives examinées.
+
+# Réalisation et preuves
+
+Distinguer ce qui a été réalisé, ce qui a été observé et ce qui reste affirmé.
+
+# Limites et perspectives
+
+Les limites documentées ne doivent pas disparaître de la production finale.
+

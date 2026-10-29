@@ -1,0 +1,9 @@
+version: 1
+usages: []
+# Exemple :
+# - date: 2026-11-10
+#   outil: assistant-ia-projets
+#   fonction: analyse de cohérence du cadrage
+#   fichiers_affectes: [cadrage/exigences.yml]
+#   verification_humaine: equipe
+

@@ -1,0 +1,37 @@
+[build-system]
+requires = ["setuptools>=75", "wheel"]
+build-backend = "setuptools.build_meta"
+
+[project]
+name = "assistant-ia-projets"
+version = "0.1.0"
+description = "Assistant facultatif de cohérence documentaire pour les Engineering Projects."
+readme = "README.md"
+requires-python = ">=3.11"
+dependencies = [
+  "openai>=2.6,<3",
+  "PyYAML>=6.0,<7",
+]
+
+[project.optional-dependencies]
+dev = [
+  "pytest>=8,<9",
+]
+
+[project.scripts]
+coherence = "assistant_ia_projets.cli:main"
+
+[tool.setuptools.packages.find]
+where = ["src"]
+
+[tool.setuptools.package-data]
+assistant_ia_projets = [
+  "prompts/*.md",
+  "templates/projet/*",
+  "templates/projet/**/*",
+]
+
+[tool.pytest.ini_options]
+testpaths = ["tests"]
+addopts = "-q"
+

@@ -1,0 +1,9 @@
+version: 1
+criteres:
+  - id: CRT-001
+    titre: Critère vérifiable à préciser
+    statut: brouillon
+    exigence: EXG-001
+    protocole: Décrire comment le critère sera vérifié.
+    resultat_attendu: À compléter.
+

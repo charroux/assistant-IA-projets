@@ -1,0 +1,11 @@
+version: 1
+ecarts: []
+# Exemple :
+# - id: ECR-001
+#   titre: Divergence entre exigence et présentation
+#   statut: ouvert
+#   gravite: majeure
+#   sources: [EXG-001, PROD-002]
+#   constat: À compléter.
+#   traitement: À décider.
+

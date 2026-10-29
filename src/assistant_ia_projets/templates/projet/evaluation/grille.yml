@@ -1,0 +1,34 @@
+version: 1
+autorite: grille_pedagogique_a_confirmer
+criteres:
+  - id: EVA-001
+    libelle: Utilité et impact
+    maximum: 15
+    observable_ia: partiel
+    limite: L'IA vérifie la documentation, pas l'impact réel.
+  - id: EVA-002
+    libelle: Innovation et pertinence de la réponse
+    maximum: 15
+    observable_ia: partiel
+    limite: L'originalité et la pertinence métier exigent un avis humain.
+  - id: EVA-003
+    libelle: Solidité de la réalisation
+    maximum: 20
+    observable_ia: partiel
+    limite: L'IA ne certifie pas le fonctionnement du prototype.
+  - id: EVA-004
+    libelle: Preuves, résultats et limites
+    maximum: 20
+    observable_ia: observable
+    limite: La validité scientifique des preuves relève d'un expert.
+  - id: EVA-005
+    libelle: Faisabilité et perspectives
+    maximum: 15
+    observable_ia: partiel
+    limite: L'IA examine l'argumentation, pas la faisabilité réelle.
+  - id: EVA-006
+    libelle: Qualité des productions documentaires
+    maximum: 15
+    observable_ia: observable
+    limite: La maîtrise orale et les réponses au jury ne sont pas observables.
+

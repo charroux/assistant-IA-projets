@@ -1,0 +1,13 @@
+version: 1
+preuves:
+  - id: PRV-001
+    titre: Preuve à documenter
+    type: essai
+    statut: brouillon
+    exigences: [EXG-001]
+    emplacement: À compléter sans exposer de donnée interdite.
+    protocole: À compléter.
+    resultat: À compléter.
+    limites: À compléter.
+    accessible_evaluateur: false
+

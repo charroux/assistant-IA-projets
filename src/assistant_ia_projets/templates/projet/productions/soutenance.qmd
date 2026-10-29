@@ -1,0 +1,32 @@
+---
+title: Soutenance
+id: PROD-002
+type: production
+statut: brouillon
+sources:
+  - BES-001
+  - EXG-001
+  - DEC-001
+  - PRV-001
+format:
+  revealjs:
+    slide-number: true
+    transition: fade
+---
+
+## Problème
+
+Présenter le problème concret et les bénéficiaires.
+
+## Parti pris
+
+Présenter une décision majeure et sa justification.
+
+## Démonstration et preuves
+
+Ne pas présenter une démonstration comme une preuve au-delà de ses limites.
+
+## Limites et suite
+
+Présenter les limites reconnues et les perspectives réalistes.
+

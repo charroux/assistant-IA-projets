@@ -1,0 +1,13 @@
+version: 1
+exigences:
+  - id: EXG-001
+    titre: Exemple d'exigence à remplacer
+    description: Décrire un comportement ou une propriété attendue.
+    statut: brouillon
+    priorite: a_definir
+    sources: [BES-001]
+    criteres: [CRT-001]
+    conception: [CPT-001]
+    preuves: [PRV-001]
+    limites: À compléter.
+

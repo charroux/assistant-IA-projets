@@ -1,0 +1,18 @@
+project:
+  type: website
+  output-dir: _site
+
+website:
+  title: Engineering Project
+  navbar:
+    left:
+      - href: rapport.qmd
+        text: Rapport
+      - href: soutenance.qmd
+        text: Soutenance
+
+format:
+  html:
+    toc: true
+    lang: fr
+

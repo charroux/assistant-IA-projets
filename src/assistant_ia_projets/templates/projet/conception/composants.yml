@@ -1,0 +1,11 @@
+version: 1
+composants:
+  - id: CPT-001
+    titre: Composant à préciser
+    statut: brouillon
+    exigences: [EXG-001]
+    decisions: [DEC-001]
+    responsabilite: À compléter.
+    interfaces: []
+    limites: À compléter.
+
